@@ -729,13 +729,13 @@ def get_patch_edit_numbers(location):
 
     return counts
 
-
 """ Java Code """
-def get_bug_repo_methods(java_file_path): # Later devide this function to functions    
+def get_java_file_methods(java_file_path): # Later devide this function to functions    
     def annotate_unsupport_code(code):
         for i, line in enumerate(code):
             if line.startswith("package ") or line.startswith("import "):
                 code[i] = '//' + code[i]
+
         return code
 
     def get_ast(functions):
@@ -743,6 +743,7 @@ def get_bug_repo_methods(java_file_path): # Later devide this function to functi
         tokens = javalang.tokenizer.tokenize("".join(func))
         parser = javalang.parser.Parser(tokens)
         tree = parser.parse_member_declaration()
+
         return tree
     
     replaceString = re.compile("[\"].*?[\"]")
@@ -792,20 +793,13 @@ def get_bug_repo_methods(java_file_path): # Later devide this function to functi
         position.sort()
         return position
 
-    source_methods = []
     buggy_methods = []
-
 
     with open(java_file_path) as file:
         buggy_class = file.readlines()
 
-
     buggy_tree = get_ast(buggy_class)
     buggy_funtions_position = get_function_positions(buggy_tree, buggy_class)
-
-
-
-
 
     buggy_methods_pos = set()
     for pos in buggy_funtions_position:
@@ -814,11 +808,7 @@ def get_bug_repo_methods(java_file_path): # Later devide this function to functi
     for x in buggy_methods_pos:
         buggy_methods.append("".join(buggy_class[x[0]:x[1]+1]))
 
-    print(buggy_methods)
-
-
-
-
+    return buggy_methods, buggy_methods_pos
 
 """ Result Processing """
 def get_response_result(response):
@@ -851,7 +841,6 @@ def get_response_result(response):
             feature_list.append('t'+type)
     
     return feature_list
-
  
 if __name__ == '__main__':
     pass

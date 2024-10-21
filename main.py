@@ -58,12 +58,13 @@ class MethodFetcher:
         self.bugs['checkout_dir'] = self.bugs.apply(self._checkout_bug, axis=1)
 
 
-
     def get_bug_repo_methods(bug):
-        for root, _, files in os.walk(os.path.join(bug['checkout_dir'], get_bug_repo_src(bug))):
+        for root, _, files in os.walk(get_bug_repo_src(bug)):
             for file in files:
                 if file.endswith(".java"):
-                    get_java_file_methods(os.path.join(root, file))
+                    file_path = os.path.join(root, file)
+                    methods = get_java_file_methods(file_path)
+
 
 
 
