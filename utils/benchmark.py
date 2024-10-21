@@ -685,6 +685,13 @@ def fix_patch(patch: pd.Series, bugs: pd.DataFrame) -> str:
 
     return None 
 
+def get_bug_repo_src(bug):
+    if bug["benchmark"] == "defects4j":
+        if "Cli" in bug.name:
+            return os.path.join(bug['checkout_dir'], "src/java/org/apache/commons/cli")
+        
+    raise "Could not find the source directory for the bug!"
+
 # Returns method
 def get_method(patch: pd.Series, bugs: pd.DataFrame = None):
     patch_uid = patch.name

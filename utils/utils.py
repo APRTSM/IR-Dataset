@@ -731,7 +731,7 @@ def get_patch_edit_numbers(location):
 
 
 """ Java Code """
-def get_java_modified_methods_git_repo(output_dir, checkout_dir, patch_dir): # Later devide this function to functions    
+def get_bug_repo_methods(java_file_path): # Later devide this function to functions    
     def annotate_unsupport_code(code):
         for i, line in enumerate(code):
             if line.startswith("package ") or line.startswith("import "):
@@ -792,86 +792,33 @@ def get_java_modified_methods_git_repo(output_dir, checkout_dir, patch_dir): # L
         position.sort()
         return position
 
-    with open(patch_dir) as f:
-        patch = PatchSet(f.read())
-
     source_methods = []
-    target_methods = []
     buggy_methods = []
-    patched_methods = []
-    patch_name = os.path.basename(patch_dir)[:-6]
-    for i, patchedFile in enumerate(patch):  # different files
-        source_start = []  # collect all star lines and find methods in class
-        target_start = []
-        for hunk in patchedFile:
-            bias = -1
-            target_start_2nd = -1
-            source_start_2nd = -1
-            curHunkCnt = [0,0]
-            for j, x in enumerate(hunk):
-                if x.line_type == '-':
-                    source_start.append(x.source_line_no-1)
-                    curHunkCnt[0] += 1
-                elif x.line_type == '+':
-                    target_start.append(x.target_line_no-1)
-                    curHunkCnt[1] += 1
-                elif sum(curHunkCnt) == 0:
-                    if x.target_line_no is not None:
-                        target_start_2nd = x.target_line_no-1
-                    if x.source_line_no is not None:
-                        source_start_2nd = x.source_line_no - 1
-            if target_start.__len__() == 0 or curHunkCnt[1] == 0:
-                target_start.append(target_start_2nd)
-            elif source_start.__len__() == 0 or curHunkCnt[0] == 0:
-                source_start.append(source_start_2nd)
 
-        original_file = os.path.join(checkout_dir, patchedFile.source_file[2:])
 
-        with open(original_file) as file:
-            buggy_class = file.readlines()
+    with open(java_file_path) as file:
+        buggy_class = file.readlines()
 
-        apply_patch_to_git_repo(checkout_dir, patch_dir)
 
-        changed_file = os.path.join(checkout_dir, patchedFile.source_file[2:])
+    buggy_tree = get_ast(buggy_class)
+    buggy_funtions_position = get_function_positions(buggy_tree, buggy_class)
 
-        with open(changed_file) as file:
-            patched_class = file.readlines()
 
-        reset_applied_patch_git_repo(checkout_dir)
 
-        buggy_tree = get_ast(buggy_class)
-        patched_tree = get_ast(patched_class)
-        buggy_funtions_position = get_function_positions(buggy_tree, buggy_class)
-        patched_funtions_position = get_function_positions(patched_tree, patched_class)
-        buggy_methods_pos = set()
-        patched_methods_pos = set()
-        for start in source_start:
-            for pos in buggy_funtions_position:
-                if pos[0] <= start and start <= pos[1]:
-                    buggy_methods_pos.add(pos)
-                    break
-        for start in target_start:
-            for pos in patched_funtions_position:
-                if pos[0] <= start and start <= pos[1]:
-                    patched_methods_pos.add(pos)
-        for x in buggy_methods_pos:
-            buggy_methods.append("".join(buggy_class[x[0]:x[1]+1]))
-        for x in patched_methods_pos:
-            patched_methods.append("".join(patched_class[x[0]:x[1]+1]))
 
-        buggy_method_dir = os.path.join(output_dir, f"source-{i}.java")
-        patched_method_dir = os.path.join(output_dir, f"target-{i}.java")
-        
-        with open(buggy_method_dir, 'w') as file:
-            file.write("".join(buggy_methods))
 
-        with open(patched_method_dir, 'w') as file:
-            file.write("".join(patched_methods))
+    buggy_methods_pos = set()
+    for pos in buggy_funtions_position:
+        buggy_methods_pos.add(pos)
 
-        source_methods.append(buggy_method_dir)
-        target_methods.append(patched_method_dir)
+    for x in buggy_methods_pos:
+        buggy_methods.append("".join(buggy_class[x[0]:x[1]+1]))
 
-    return source_methods, target_methods    
+    print(buggy_methods)
+
+
+
+
 
 """ Result Processing """
 def get_response_result(response):

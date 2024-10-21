@@ -1,6 +1,7 @@
 from utils.benchmark import *
 import pandas as pd
 import json
+import os
 
 class MethodFetcher:
     def __init__(self):
@@ -57,12 +58,22 @@ class MethodFetcher:
         self.bugs['checkout_dir'] = self.bugs.apply(self._checkout_bug, axis=1)
 
 
+
+    def get_bug_repo_methods(bug):
+        for root, _, files in os.walk(os.path.join(bug['checkout_dir'], get_bug_repo_src(bug))):
+            for file in files:
+                if file.endswith(".java"):
+                    get_java_file_methods(os.path.join(root, file))
+
+
+
 if __name__=="__main__":
     fetcher = MethodFetcher()
     fetcher.get_bug_list()
     fetcher.clean_no_report()
     fetcher.clean_no_patch()
     fetcher.checkout_bugs()
+
 
     
 
