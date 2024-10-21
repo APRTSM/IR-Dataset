@@ -50,7 +50,7 @@ class MethodFetcher:
         self.bugs = self.bugs[self.bugs.apply(self._developer_patch_exists, axis=1)]
 
     def _checkout_bug(self, bug):
-        return self.checkout_functions[bug['benchmark'].lower()](bug) ############ Check this
+        return self.checkout_functions[bug['benchmark']](bug) ############ Check this
 
     def checkout_bugs(self):
         print(self.bugs)

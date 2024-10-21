@@ -51,7 +51,7 @@ def get_bug_list_defects4j():
                             id_in_project = row["bug.id"]
                             bug_info = {
                                 "uid": f"defects4j-{project}-{id_in_project}",
-                                "benchmark": "Defects4J",
+                                "benchmark": "defects4j",
                                 "project": project,
                                 "number": id_in_project,
                                 "report_link": report_link,
@@ -63,7 +63,7 @@ def get_bug_list_defects4j():
     return bug_list
 
 def checkout_bug_defects4j(bug):
-    bug_uid, id, project = bug["uid"], bug["number"], bug["project"]
+    bug_uid, id, project = bug.name, bug["number"], bug["project"]
     output_dir = os.path.join(TMP_CHECKOUTS_DIR, f"{bug_uid}")
     
     execute_bash_command(f"defects4j checkout -p {project} -v {id}b -w {output_dir}")
