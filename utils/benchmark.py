@@ -781,3 +781,14 @@ def is_single_hunk(patch: pd.Series):
     
     return True
 
+# Get All Methods in the Source
+def get_bug_repo_methods(bug):
+    for root, _, files in os.walk(get_bug_repo_src(bug)):
+        for file in files:
+            if file.endswith(".java"):
+                file_path = os.path.join(root, file)
+                methods, positions = get_java_file_methods(file_path)
+
+                print(file_path)
+                print(methods)
+                print(positions)

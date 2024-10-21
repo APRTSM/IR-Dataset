@@ -57,14 +57,8 @@ class MethodFetcher:
         self.bugs = self.bugs.loc[['defects4j-Cli-25']]
         self.bugs['checkout_dir'] = self.bugs.apply(self._checkout_bug, axis=1)
 
-
-    def get_bug_repo_methods(bug):
-        for root, _, files in os.walk(get_bug_repo_src(bug)):
-            for file in files:
-                if file.endswith(".java"):
-                    file_path = os.path.join(root, file)
-                    methods = get_java_file_methods(file_path)
-
+    def get_methods(self):
+        self
 
 
 
