@@ -32,3 +32,7 @@ if __name__ == "__main__":
             "label": 40
         }
     ]
+
+    data = pd.DataFrame(data)
+
+    data.to_csv("tmp/results/defects4j-Cli-25.csv", index=False)
