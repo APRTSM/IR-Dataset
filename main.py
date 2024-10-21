@@ -1,9 +1,13 @@
 from utils.benchmark import *
+from string import Template
 import pandas as pd
 import json
 import os
+import ollama
+from tqdm import tqdm
 
-class MethodFetcher:
+
+class Collector:
     def __init__(self):
         with open(BENCHMARKS_JSON, 'r') as file:
             self.benchmarks = json.load(file)
@@ -58,16 +62,59 @@ class MethodFetcher:
         self.bugs['checkout_dir'] = self.bugs.apply(self._checkout_bug, axis=1)
 
     def get_methods(self):
-        self
+        self.bugs['methods_dir'] = self.bugs.apply(get_source_methods, axis=1)
 
+
+class Executor:
+    def __init__(self, model, prompt, prompt_id, temperature):
+        self.collector = Collector()
+
+        self.collector.get_bug_list()
+        self.collector.clean_no_report()
+        self.collector.clean_no_patch()
+        self.collector.checkout_bugs()
+        self.collector.get_methods()
+
+        self.model = model
+        self.prompt = prompt
+        self.prompt_id = prompt_id
+        self.temperature = temperature
+
+    def _get_response(self, method):
+        response = ollama.chat(model=self.model, keep_alive=-1, options=ollama.Options(temperature=self.temperature), messages=[
+            {
+                "role": "system",
+                "content": self.prompt.format(method=method["method"])
+            },
+        ])
+
+        return response["message"]["content"]
+    
+    def _run_bug(self, bug):
+        process_id = f"{bug.name}-{self.model}-{self.prompt_id}-{self.temperature}"
+        
+        logging.info(f"Processing {process_id}!")
+
+        bug_methods = pd.read_pickle(bug["methods_dir"])
+        tqdm.pandas(desc=f"Processing  {process_id}!")
+        bug_methods["response"] = bug_methods.progress_apply(self._get_response, axis=1)
+        
+        out_file_name = f"{process_id}.pkl"
+        bug_methods.to_pickle(os.path.join(TMP_RESULTS_DIR, out_file_name))
+
+    def run(self):
+        self.collector.bugs.apply(self._run_bug, axis=1)
 
 
 if __name__=="__main__":
-    fetcher = MethodFetcher()
-    fetcher.get_bug_list()
-    fetcher.clean_no_report()
-    fetcher.clean_no_patch()
-    fetcher.checkout_bugs()
+    simple_prompt = """
+        Please Provide information about the following method, and describe what it does generally.
+
+        {method}
+    """
+    executor = Executor("qwen2.5-coder:7b", simple_prompt, 0.1)
+
+
 
 
     

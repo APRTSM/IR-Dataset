@@ -782,13 +782,30 @@ def is_single_hunk(patch: pd.Series):
     return True
 
 # Get All Methods in the Source
-def get_bug_repo_methods(bug):
+def get_source_methods(bug):
+    all_methods = []
+
     for root, _, files in os.walk(get_bug_repo_src(bug)):
         for file in files:
             if file.endswith(".java"):
                 file_path = os.path.join(root, file)
                 methods, positions = get_java_file_methods(file_path)
 
-                print(file_path)
-                print(methods)
-                print(positions)
+                method_info = [
+                    {
+                        'path': file_path,
+                        'method': method, 
+                        'position': pos
+                    }
+                    
+                    for method, pos in zip(methods, positions)
+                ]
+
+                all_methods += method_info
+
+        methods_df = pd.DataFrame(all_methods)
+        pickle_path = os.path.join(TMP_RESULTS_DIR, f'{bug.name}.pkl')
+        methods_df.to_pickle(pickle_path)
+
+        return pickle_path
+
