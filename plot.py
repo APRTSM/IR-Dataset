@@ -28,6 +28,7 @@ if __name__ == "__main__":
 
     data = [
         {
+            "bug": "defects4j-Cli-25",
             "query": query,
             "label": 40
         }
@@ -35,4 +36,4 @@ if __name__ == "__main__":
 
     data = pd.DataFrame(data)
 
-    data.to_csv("tmp/results/defects4j-Cli-25.csv", index=False)
+    data.to_csv("tmp/results/query.csv", index=False)
