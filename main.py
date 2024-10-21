@@ -58,7 +58,7 @@ class Collector:
         return self.checkout_functions[bug['benchmark']](bug) ############ Check this
 
     def checkout_bugs(self):
-        self.bugs = self.bugs.loc[['defects4j-Cli-25']]
+        self.bugs = self.bugs.loc[['defects4j-Cli-26']]
         self.bugs['checkout_dir'] = self.bugs.apply(self._checkout_bug, axis=1)
 
     def get_methods(self):
@@ -112,7 +112,8 @@ if __name__=="__main__":
 
         {method}
     """
-    executor = Executor("qwen2.5-coder:7b", simple_prompt, 0.1)
+    executor = Executor("codellama:7b-instruct", simple_prompt, "simple", 0.1)
+    executor.run()
 
 
 
