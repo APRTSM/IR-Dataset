@@ -58,7 +58,7 @@ class Collector:
         return self.checkout_functions[bug['benchmark']](bug) ############ Check this
 
     def checkout_bugs(self):
-        self.bugs = self.bugs.loc[['defects4j-Cli-26']]
+        self.bugs = self.bugs.loc[['defects4j-Cli-28']]
         self.bugs['checkout_dir'] = self.bugs.apply(self._checkout_bug, axis=1)
 
     def get_methods(self):
